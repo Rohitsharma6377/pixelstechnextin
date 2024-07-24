@@ -14,8 +14,8 @@ const AboutPage = () => {
   return (
     <>
       <Breadcrumb
-        pageName="About Page"
-        description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. In varius eros eget sapien consectetur ultrices. Ut quis dapibus libero."
+        pageName="About Us "
+        description="At Pixel pioneers tech, we are a team of passionate technologists and innovators dedicated to transforming ideas into cutting-edge software solutions. Founded in [Year], our company has grown from a small startup into a leading provider of software services, recognized for our commitment to quality, innovation, and customer satisfaction."
       />
       <AboutSectionOne />
       <AboutSectionTwo />
