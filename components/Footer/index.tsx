@@ -17,8 +17,7 @@ const Footer = () => {
                   <h1>Pixelpioneers</h1>   
                 </Link>
                 <p className="dark:text-body-color-dark mb-9 text-base leading-relaxed text-body-color">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Integer lobortis.
+                  Empowering businesses with innovative technology solutions. We're committed to delivering excellence in every project we undertake.
                 </p>
                 <div className="flex items-center">
                   <a

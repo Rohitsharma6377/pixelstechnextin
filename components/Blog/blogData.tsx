@@ -3,45 +3,45 @@ import { Blog } from "@/types/blog";
 const blogData: Blog[] = [
   {
     id: 1,
-    title: "Best UI components for modern websites",
+    title: "The Future of Web Development: Trends to Watch in 2024",
     paragraph:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sit amet dictum neque, laoreet dolor.",
+      "Explore the latest trends in web development, from AI-powered tools to WebAssembly and the rise of edge computing. Learn how these technologies are shaping the future of web applications.",
     image: "/images/blog/blog-01.jpg",
     author: {
-      name: "Samuyl Joshi",
+      name: "Sarah Johnson",
       image: "/images/blog/author-01.png",
-      designation: "Graphic Designer",
+      designation: "Senior Web Developer",
     },
-    tags: ["creative"],
-    publishDate: "2025",
+    tags: ["Web Development", "Technology"],
+    publishDate: "2024",
   },
   {
     id: 2,
-    title: "9 simple ways to improve your design skills",
+    title: "Mastering React Performance Optimization",
     paragraph:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sit amet dictum neque, laoreet dolor.",
+      "Discover essential techniques for optimizing React applications, including code splitting, memoization, and virtual DOM optimization. Learn how to build faster, more efficient React applications.",
     image: "/images/blog/blog-02.jpg",
     author: {
-      name: "Musharof Chy",
+      name: "Michael Chen",
       image: "/images/blog/author-02.png",
-      designation: "Content Writer",
+      designation: "React Specialist",
     },
-    tags: ["computer"],
-    publishDate: "2025",
+    tags: ["React", "Performance"],
+    publishDate: "2024",
   },
   {
     id: 3,
-    title: "Tips to quickly improve your coding speed.",
+    title: "Building Scalable Microservices Architecture",
     paragraph:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sit amet dictum neque, laoreet dolor.",
+      "Learn the best practices for designing and implementing microservices architecture. From service discovery to API gateways, understand how to build robust and scalable distributed systems.",
     image: "/images/blog/blog-03.jpg",
     author: {
-      name: "Lethium Deo",
+      name: "Emily Rodriguez",
       image: "/images/blog/author-03.png",
-      designation: "Graphic Designer",
+      designation: "System Architect",
     },
-    tags: ["design"],
-    publishDate: "2025",
+    tags: ["Microservices", "Architecture"],
+    publishDate: "2024",
   },
 ];
 export default blogData;
