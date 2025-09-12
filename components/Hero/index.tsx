@@ -23,8 +23,8 @@ const Hero = () => {
                 <h1 className="mb-5 text-3xl font-bold leading-tight text-black dark:text-white sm:text-4xl sm:leading-tight md:text-5xl md:leading-tight">
                   Empowering Your Digital Vision
                 </h1>
-                <p className="dark:text-body-color-dark mb-12 text-base !leading-relaxed text-body-color sm:text-lg md:text-xl">
-                  At Pixelpioneerstech, we turn your ideas into reality with
+                <p className="dark:text-white  mb-12 text-base !leading-relaxed sm:text-lg md:text-xl">
+                  At Netcurion Tech Pvt. Ltd., we turn your ideas into reality with
                   innovative web solutions. Our team of expert developers and
                   designers craft responsive, high-performance websites that
                   drive engagement and deliver results. From concept to launch,

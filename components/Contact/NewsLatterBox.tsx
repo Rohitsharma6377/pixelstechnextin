@@ -1,9 +1,57 @@
 "use client";
 
+import { useRef, useState } from "react";
+import emailjs from "@emailjs/browser";
 import { useTheme } from "next-themes";
 
 const NewsLatterBox = () => {
   const { theme } = useTheme();
+
+  const formRef = useRef<HTMLFormElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSuccess(null);
+    setError(null);
+
+    const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "";
+    const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "";
+    const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "";
+
+    if (!serviceId || !templateId || !publicKey) {
+      setError(
+        "Email service is not configured. Please set NEXT_PUBLIC_EMAILJS_SERVICE_ID, NEXT_PUBLIC_EMAILJS_TEMPLATE_ID, NEXT_PUBLIC_EMAILJS_PUBLIC_KEY."
+      );
+      return;
+    }
+
+    try {
+      setLoading(true);
+      if (!formRef.current) throw new Error("Form not available");
+
+      // set time and default message values
+      const timeInput = formRef.current.elements.namedItem("time") as HTMLInputElement | null;
+      if (timeInput) timeInput.value = new Date().toLocaleString();
+      const msgInput = formRef.current.elements.namedItem("message") as HTMLInputElement | null;
+      if (msgInput && !msgInput.value) msgInput.value = "Newsletter subscription request";
+
+      const result = await emailjs.sendForm(serviceId, templateId, formRef.current, {
+        publicKey,
+      });
+
+      if (result.status !== 200) throw new Error("Failed to subscribe");
+
+      setSuccess("Thanks for subscribing! Please check your inbox.");
+      formRef.current.reset();
+    } catch (err: any) {
+      setError(err?.text || err?.message || "Something went wrong. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -14,30 +62,50 @@ const NewsLatterBox = () => {
         Subscribe to our newsletter for the latest updates, tech insights, and exclusive offers delivered straight to your inbox.
       </h3>
       <p className="mb-11 border-b border-body-color border-opacity-25 pb-11 text-base leading-relaxed text-body-color dark:border-white dark:border-opacity-25">
-        Lorem ipsum dolor sited Sed ullam corper consectur adipiscing Mae ornare
-        massa quis lectus.
+        Join thousands of leaders who rely on Netcurion Technology for practical
+        insights on cybersecurity, cloud, DevOps, and modern software delivery.
+        Get carefully curated updates—no spam, just value.
       </p>
       <div>
-        <input
-          type="text"
-          name="name"
-          placeholder="Enter your name"
-          className="border-stroke dark:text-body-color-dark dark:shadow-two mb-4 w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:focus:border-primary dark:focus:shadow-none"
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Enter your email"
-          className="border-stroke dark:text-body-color-dark dark:shadow-two mb-4 w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:focus:border-primary dark:focus:shadow-none"
-        />
-        <input
-          type="submit"
-          value="Subscribe"
-          className="shadow-submit dark:shadow-submit-dark mb-5 flex w-full cursor-pointer items-center justify-center rounded-sm bg-primary px-9 py-4 text-base font-medium text-white duration-300 hover:bg-primary/90"
-        />
-        <p className="dark:text-body-color-dark text-center text-base leading-relaxed text-body-color">
-          No spam guaranteed, So please don't send any spam mail.
-        </p>
+        {success && (
+          <div className="mb-4 rounded-sm bg-green-50 px-4 py-3 text-green-700 dark:bg-green-900/20 dark:text-green-300">
+            {success}
+          </div>
+        )}
+        {error && (
+          <div className="mb-4 rounded-sm bg-red-50 px-4 py-3 text-red-700 dark:bg-red-900/20 dark:text-red-300">
+            {error}
+          </div>
+        )}
+        <form ref={formRef} onSubmit={handleSubmit} noValidate>
+          <input
+            type="text"
+            name="name"
+            placeholder="Enter your name"
+            className="border-stroke dark:text-body-color-dark dark:shadow-two mb-4 w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:focus:border-primary dark:focus:shadow-none"
+            required
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter your email"
+            className="border-stroke dark:text-body-color-dark dark:shadow-two mb-4 w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:focus:border-primary dark:focus:shadow-none"
+            required
+          />
+          {/* Hidden template variables */}
+          <input type="hidden" name="time" />
+          <input type="hidden" name="message" value="" />
+          <button
+            type="submit"
+            disabled={loading}
+            className="shadow-submit dark:shadow-submit-dark mb-5 flex w-full items-center justify-center rounded-sm bg-primary px-9 py-4 text-base font-medium text-white duration-300 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {loading ? "Subscribing..." : "Subscribe"}
+          </button>
+          <p className="dark:text-body-color-dark text-center text-base leading-relaxed text-body-color">
+            No spam guaranteed, So please don't send any spam mail.
+          </p>
+        </form>
       </div>
 
       <div>

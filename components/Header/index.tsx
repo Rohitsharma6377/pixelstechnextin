@@ -41,22 +41,18 @@ const Header = () => {
   return (
     <>
       <header
-        className={`header left-0 top-0 z-40 flex w-full items-center ${
-          sticky
-            ? "dark:bg-gray-dark dark:shadow-sticky-dark fixed z-[9999] bg-white !bg-opacity-80 shadow-sticky backdrop-blur-sm transition"
-            : "absolute bg-transparent"
-        }`}
+        className={`header fixed left-0 top-0 z-[9999] w-full transition-all duration-300`}
       >
         <div className="container">
-          <div className="relative -mx-4 flex items-center justify-between">
+          {/* Nav shell */}
+          <div
+            className={
+              "mt-4 flex items-center justify-between rounded-2xl border border-black/5 bg-white/95 px-4 py-3 shadow-lg ring-1 ring-black/5 backdrop-blur md:px-6 lg:mt-6 dark:border-white/10 dark:bg-[#0f172a]/95 dark:ring-white/5"
+            }
+          >
             <div className="w-60 max-w-full px-4 xl:mr-12">
-              <Link
-                href="/"
-                className={`header-logo block w-full ${
-                  sticky ? "py-5 lg:py-2" : "py-8"
-                } `}
-              >
-                <h1>PixelPioneers</h1>
+              <Link href="/" className={`header-logo block w-full py-5 lg:py-4`}>
+                <h1>Netcurion Tech Pvt. Ltd.</h1>
               </Link>
             </div>
             <div className="flex w-full items-center justify-between px-4">
@@ -85,7 +81,7 @@ const Header = () => {
                 </button>
                 <nav
                   id="navbarCollapse"
-                  className={`navbar absolute right-0 z-30 w-[250px] rounded border-[.5px] border-body-color/50 bg-white px-6 py-4 duration-300 dark:border-body-color/20 dark:bg-dark lg:visible lg:static lg:w-auto lg:border-none lg:!bg-transparent lg:p-0 lg:opacity-100 ${
+                  className={`navbar absolute right-0 z-30 w-[250px] rounded border-[.5px] border-body-color/50 bg-white px-6 py-4 duration-300 dark:border-body-color/20 dark:bg-[#0b1220] lg:visible lg:static lg:w-auto lg:border-none lg:!bg-transparent lg:p-0 lg:opacity-100 ${
                     navbarOpen
                       ? "visibility top-full opacity-100"
                       : "invisible top-[120%] opacity-0"
@@ -148,13 +144,13 @@ const Header = () => {
               <div className="flex items-center justify-end pr-16 lg:pr-0">
                 <Link
                   href="https://github.com/Rohitsharma6377"
-                  className="hidden px-7 py-3 text-base font-medium text-dark hover:opacity-70 dark:text-white md:block"
+                  className="hidden px-7 py-3 text-base font-medium text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white md:block"
                 >
                   Github
                 </Link>
                 <Link
                   href="/contact"
-                  className="ease-in-up shadow-btn hover:shadow-btn-hover hidden rounded-sm bg-primary px-8 py-3 text-base font-medium text-white transition duration-300 hover:bg-opacity-90 md:block md:px-9 lg:px-6 xl:px-9"
+                  className="hidden rounded-xl bg-slate-900 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:-translate-y-[1px] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:bg-white dark:text-slate-900 md:block md:px-7 lg:px-6 xl:px-8"
                 >
                   Contact us
                 </Link>

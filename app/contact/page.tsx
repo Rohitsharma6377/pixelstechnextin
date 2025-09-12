@@ -4,17 +4,26 @@ import Contact from "@/components/Contact";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Contact Page | Free Next.js Template for Startup and SaaS",
-  description: "This is Contact Page for Startup Nextjs Template",
-  // other metadata
+  title: "Contact Netcurion Technology | Talk to Our Experts",
+  description:
+    "Get in touch with Netcurion Technology for cybersecurity, cloud, DevOps, and software engineering services. Request a consultation or support—our team will respond quickly.",
+  keywords: [
+    "Netcurion Technology",
+    "contact",
+    "cybersecurity",
+    "cloud",
+    "DevOps",
+    "Next.js",
+    "managed IT",
+  ],
 };
 
 const ContactPage = () => {
   return (
     <>
       <Breadcrumb
-        pageName="Contact Page"
-        description="Get in touch with our team of experts. We're here to help you with any questions about our services, technical support, or partnership opportunities."
+        pageName="Contact Netcurion Technology"
+        description="Speak with our team about managed SOC, cloud security, DevOps automation, and modern app development. We’ll respond promptly to your request."
       />
 
       <Contact />

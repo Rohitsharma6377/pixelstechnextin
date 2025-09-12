@@ -5,8 +5,8 @@ import Breadcrumb from "@/components/Common/Breadcrumb";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Pixelpioneerstech",
-  description: "This is About Page for Pixelpioneerstech",
+  title: "Netcurion Tech Pvt. Ltd.",
+  description: "This is About Page for Netcurion Tech Pvt. Ltd.",
   // other metadata
 };
 
@@ -15,7 +15,7 @@ const AboutPage = () => {
     <>
       <Breadcrumb
         pageName="About Us "
-        description="At Pixel pioneers tech, we are a team of passionate technologists and innovators dedicated to transforming ideas into cutting-edge software solutions. Founded in [Year], our company has grown from a small startup into a leading provider of software services, recognized for our commitment to quality, innovation, and customer satisfaction."
+        description="At Netcurion Tech Pvt. Ltd. we are a team of passionate technologists and innovators dedicated to transforming ideas into cutting-edge software solutions. Founded in [Year], our company has grown from a small startup into a leading provider of software services, recognized for our commitment to quality, innovation, and customer satisfaction."
       />
       <AboutSectionOne />
       <AboutSectionTwo />

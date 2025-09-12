@@ -31,8 +31,10 @@ const AboutSectionTwo = () => {
                   Bug free code
                 </h3>
                 <p className="text-base font-medium leading-relaxed text-body-color sm:text-lg sm:leading-relaxed">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  At Netcurion Technology, quality is engineered into every
+                  sprint. Our peer-reviewed workflows, automated testing, and
+                  CI/CD pipelines ensure reliable releases with near-zero
+                  regressions—so your product ships fast and stays stable.
                 </p>
               </div>
               <div className="mb-9">
@@ -40,8 +42,9 @@ const AboutSectionTwo = () => {
                   Premier support
                 </h3>
                 <p className="text-base font-medium leading-relaxed text-body-color sm:text-lg sm:leading-relaxed">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt.
+                  Get responsive, senior-level support from a team that knows
+                  your stack. From onboarding to 24/7 incident response, we
+                  keep your apps secure, performant, and always-on.
                 </p>
               </div>
               <div className="mb-1">
@@ -49,8 +52,9 @@ const AboutSectionTwo = () => {
                   Next.js
                 </h3>
                 <p className="text-base font-medium leading-relaxed text-body-color sm:text-lg sm:leading-relaxed">
-                  Lorem ipsum dolor sit amet, sed do eiusmod tempor incididunt
-                  consectetur adipiscing elit setim.
+                  We build modern, SEO-friendly web apps with Next.js—optimized
+                  for Core Web Vitals, accessibility, and conversion. Integrate
+                  seamlessly with headless CMS, CDNs, and enterprise auth.
                 </p>
               </div>
             </div>

@@ -13,8 +13,8 @@ const Video = () => {
     <section className="relative z-10 py-16 md:py-20 lg:py-28">
       <div className="container">
         <SectionTitle
-          title="We are ready to help"
-          paragraph="There are many variations of passages of Lorem Ipsum available but the majority have suffered alteration in some form."
+          title="Netcurion Technology — Your Trusted IT & Cybersecurity Partner"
+          paragraph="From proactive SOC monitoring to cloud-native app development and managed IT, Netcurion Technology delivers secure, scalable solutions that accelerate business growth. Speak with our experts and see how we can harden your security posture and modernize your stack."
           center
           mb="80px"
         />
