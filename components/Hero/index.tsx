@@ -5,7 +5,7 @@ const Hero = () => {
     <>
       <section
         id="home"
-        className="relative z-10 overflow-hidden bg-white dark:bg-gray-dark pb-16 pt-[120px] md:pb-[120px] md:pt-[150px] xl:pb-[160px] xl:pt-[180px] 2xl:pb-[200px] 2xl:pt-[210px]"
+        className="relative z-10 overflow-hidden pb-16 pt-[120px] md:pb-[120px] md:pt-[150px] xl:pb-[160px] xl:pt-[180px] 2xl:pb-[200px] 2xl:pt-[210px]"
         style={{
           backgroundImage: 'url("/images/hero/hero.jpg")',
           backgroundSize: 'cover',
@@ -13,17 +13,19 @@ const Hero = () => {
           backgroundRepeat: 'no-repeat'
         }}
       >
+        {/* Overlay for better text contrast */}
+        <div className="absolute inset-0 bg-black/50" />
         <div className="container">
           <div className="-mx-4 flex flex-wrap">
             <div className="w-full px-4">
               <div
-                className="wow fadeInUp mx-auto max-w-[800px] text-center"
+                className="wow fadeInUp relative z-10 mx-auto max-w-[800px] text-center"
                 data-wow-delay=".2s"
               >
-                <h1 className="mb-5 text-3xl font-bold leading-tight text-black dark:text-white sm:text-4xl sm:leading-tight md:text-5xl md:leading-tight">
+                <h1 className="mb-5 text-3xl font-bold leading-tight text-white drop-shadow sm:text-4xl sm:leading-tight md:text-5xl md:leading-tight">
                   Empowering Your Digital Vision
                 </h1>
-                <p className="dark:text-white  mb-12 text-base !leading-relaxed sm:text-lg md:text-xl">
+                <p className="mb-12 text-base !leading-relaxed text-white/90 sm:text-lg md:text-xl">
                   At Netcurion Tech Pvt. Ltd., we turn your ideas into reality with
                   innovative web solutions. Our team of expert developers and
                   designers craft responsive, high-performance websites that
