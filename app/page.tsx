@@ -11,6 +11,8 @@ import Hero from "@/components/Hero";
 import Pricing from "@/components/Pricing";
 import Testimonials from "@/components/Testimonials";
 import Video from "@/components/Video";
+import WhyUs from "@/components/WhyUs";
+import TechSlider from "@/components/TechSlider";
 // import Video from "@/components/Video";
 import { Metadata } from "next";
 
@@ -26,12 +28,14 @@ export default function Home() {
     <>
       <ScrollUp />
       <Hero />
+      <TechSlider />
       <Features />
       {/* <FocusCardsDemo/> */}
       <Video />
       <Brands />
       <AboutSectionOne />
       <AboutSectionTwo />
+      <WhyUs />
       <Testimonials />
       {/* <Pricing /> */}
       <Blog />

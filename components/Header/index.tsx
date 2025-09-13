@@ -24,7 +24,10 @@ const Header = () => {
   };
   useEffect(() => {
     window.addEventListener("scroll", handleStickyNavbar);
-  });
+    return () => {
+      window.removeEventListener("scroll", handleStickyNavbar);
+    };
+  }, []);
 
   // submenu handler
   const [openIndex, setOpenIndex] = useState(-1);
@@ -41,18 +44,30 @@ const Header = () => {
   return (
     <>
       <header
-        className={`header fixed left-0 top-0 z-[9999] w-full transition-all duration-300`}
+        className={`header fixed left-0 top-0 z-[9999] w-full transition-all duration-300 ${
+          sticky ? "bg-transparent" : "bg-transparent"
+        }`}
       >
         <div className="container">
           {/* Nav shell */}
           <div
-            className={
-              "mt-4 flex items-center justify-between rounded-2xl border border-black/5 bg-white/95 px-4 py-3 shadow-lg ring-1 ring-black/5 backdrop-blur md:px-6 lg:mt-6 dark:border-white/10 dark:bg-[#0f172a]/95 dark:ring-white/5"
-            }
+            className={`mt-3 flex items-center justify-between rounded-2xl border border-slate-900/5 bg-slate-100/70 px-3 py-2 shadow-md ring-1 ring-black/5 backdrop-blur md:px-5 lg:mt-5 dark:border-white/10 dark:bg-white/5 dark:ring-white/10`}
           >
             <div className="w-60 max-w-full px-4 xl:mr-12">
-              <Link href="/" className={`header-logo block w-full py-5 lg:py-4`}>
-                <h1>Netcurion Tech Pvt. Ltd.</h1>
+              <Link href="/" className="header-logo flex items-center gap-3 py-2 lg:py-1">
+                <Image
+                  src="/images/logo/logo.jpeg"
+                  alt="Netcurion Tech Pvt. Ltd. logo"
+                  width={140}
+                  height={40}
+                  priority
+                  className="h-9 w-auto"
+                />
+                <span className="sr-only">Netcurion Tech Pvt. Ltd.</span>
+                <div className="leading-tight">
+                  <div className="text-sm font-extrabold text-indigo-700 dark:text-indigo-400">Netcurion</div>
+                  <div className="text-sm font-semibold text-indigo-700/90 dark:text-indigo-300">Technology</div>
+                </div>
               </Link>
             </div>
             <div className="flex w-full items-center justify-between px-4">
@@ -93,10 +108,10 @@ const Header = () => {
                         {menuItem.path ? (
                           <Link
                             href={menuItem.path}
-                            className={`flex py-2 text-base lg:mr-0 lg:inline-flex lg:px-0 lg:py-6 ${
+                            className={`flex py-2 text-base font-medium lg:mr-0 lg:inline-flex lg:px-0 lg:py-6 ${
                               usePathName === menuItem.path
-                                ? "text-primary dark:text-white"
-                                : "text-dark hover:text-primary dark:text-white/70 dark:hover:text-white"
+                                ? "text-indigo-700 font-semibold dark:text-indigo-400"
+                                : "text-slate-700 hover:text-indigo-700 dark:text-white/80 dark:hover:text-white"
                             }`}
                           >
                             {menuItem.title}
@@ -141,22 +156,24 @@ const Header = () => {
                   </ul>
                 </nav>
               </div>
-              <div className="flex items-center justify-end pr-16 lg:pr-0">
-                <Link
-                  href="https://github.com/Rohitsharma6377"
-                  className="hidden px-7 py-3 text-base font-medium text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white md:block"
-                >
-                  Github
-                </Link>
-                <Link
-                  href="/contact"
-                  className="hidden rounded-xl bg-slate-900 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:-translate-y-[1px] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:bg-white dark:text-slate-900 md:block md:px-7 lg:px-6 xl:px-8"
-                >
-                  Contact us
-                </Link>
-                
-                <div>
-                  <ThemeToggler />
+              <div className="flex items-center justify-end gap-2 pr-2 lg:pr-0">
+                <div className="hidden items-center gap-2 rounded-full bg-white/70 p-1 pl-2 shadow-sm ring-1 ring-black/5 backdrop-blur dark:bg-white/5 dark:ring-white/10 md:flex">
+                  <Link
+                    href="/login"
+                    className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white shadow transition hover:bg-indigo-500"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="rounded-lg bg-white px-4 py-1.5 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 transition hover:bg-slate-50 dark:bg-transparent dark:text-white dark:ring-white/20 dark:hover:bg-white/10"
+                  >
+                    Sign Up
+                  </Link>
+                  <span className="mx-1 h-6 w-px bg-slate-300/70 dark:bg-white/15" />
+                  <div className="ml-1">
+                    <ThemeToggler />
+                  </div>
                 </div>
               </div>
             </div>

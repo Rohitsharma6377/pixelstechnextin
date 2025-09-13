@@ -31,3 +31,23 @@
     @apply opacity-100;
   }
 }
+
+/* Utilities for marquee-style tech slider */
+@layer utilities {
+  @keyframes scroll-x {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-infinite-scroll {
+    animation: scroll-x 22s linear infinite;
+  }
+
+  .slider-pause:hover .animate-infinite-scroll {
+    animation-play-state: paused;
+  }
+}
