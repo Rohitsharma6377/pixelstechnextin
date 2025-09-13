@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import ThemeToggler from "./ThemeToggler";
 import menuData from "./menuData";
+import { useAuth } from "@/app/auth-context";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
   // Navbar toggle
@@ -40,6 +42,16 @@ const Header = () => {
   };
 
   const usePathName = usePathname();
+  const { user, loading, logout } = useAuth();
+  const role = user?.role?.toLowerCase();
+  const router = useRouter();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const toggleUserMenu = () => setUserMenuOpen((v) => !v);
+  const onLogout = async () => {
+    await logout();
+    setUserMenuOpen(false);
+    router.push("/");
+  };
 
   return (
     <>
@@ -63,7 +75,7 @@ const Header = () => {
                   priority
                   className="h-9 w-auto"
                 />
-                <span className="sr-only">Netcurion Tech Pvt. Ltd.</span>
+                {/* <span className="sr-only">Netcurion Tech Pvt. Ltd.</span> */}
                 <div className="leading-tight">
                   <div className="text-sm font-extrabold text-indigo-700 dark:text-indigo-400">Netcurion</div>
                   <div className="text-sm font-semibold text-indigo-700/90 dark:text-indigo-300">Technology</div>
@@ -153,29 +165,107 @@ const Header = () => {
                         )}
                       </li>
                     ))}
+                    {!!user && (
+                      <li className="group relative">
+                        <Link
+                          href="/upload"
+                          className={`flex py-2 text-base font-medium lg:mr-0 lg:inline-flex lg:px-0 lg:py-6 ${
+                            usePathName === "/upload"
+                              ? "text-indigo-700 font-semibold dark:text-indigo-400"
+                              : "text-slate-700 hover:text-indigo-700 dark:text-white/80 dark:hover:text-white"
+                          }`}
+                        >
+                          Upload
+                        </Link>
+                      </li>
+                    )}
+                    {!!user && role === "admin" && (
+                      <li className="group relative">
+                        <Link
+                          href="/admin"
+                          className={`flex py-2 text-base font-medium lg:mr-0 lg:inline-flex lg:px-0 lg:py-6 ${
+                            usePathName === "/admin"
+                              ? "text-indigo-700 font-semibold dark:text-indigo-400"
+                              : "text-slate-700 hover:text-indigo-700 dark:text-white/80 dark:hover:text-white"
+                          }`}
+                        >
+                          Admin
+                        </Link>
+                      </li>
+                    )}
+                    {!!user && role === "admin" && (
+                      <li className="group relative">
+                        <Link
+                          href="/blog/new"
+                          className={`flex py-2 text-base font-medium lg:mr-0 lg:inline-flex lg:px-0 lg:py-6 ${
+                            usePathName === "/blog/new"
+                              ? "text-indigo-700 font-semibold dark:text-indigo-400"
+                              : "text-slate-700 hover:text-indigo-700 dark:text-white/80 dark:hover:text-white"
+                          }`}
+                        >
+                          New Post
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 </nav>
               </div>
-              <div className="flex items-center justify-end gap-2 pr-2 lg:pr-0">
-                <div className="hidden items-center gap-2 rounded-full bg-white/70 p-1 pl-2 shadow-sm ring-1 ring-black/5 backdrop-blur dark:bg-white/5 dark:ring-white/10 md:flex">
-                  <Link
-                    href="/login"
-                    className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white shadow transition hover:bg-indigo-500"
+              {/* Inline actions for md+ screens */}
+              {!!user && role === "ADMIN" && (
+                <button
+                  type="button"
+                  onClick={() => router.push("/admin")}
+                  className="hidden rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500 md:inline-flex"
+                >
+                  Dashboard
+                </button>
+              )}
+              {!!user && (
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="hidden rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-300 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 md:inline-flex"
+                >
+                  Logout
+                </button>
+              )}
+
+              {/* Mobile profile menu (icon + dropdown) */}
+              {!!user && (
+                <div className="relative md:hidden" tabIndex={0} onBlur={() => setUserMenuOpen(false)}>
+                  <button
+                    type="button"
+                    onClick={toggleUserMenu}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 shadow hover:bg-slate-50 dark:border-white/10 dark:bg-white/10 dark:text-white"
+                    aria-label="User menu"
                   >
-                    Login
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="rounded-lg bg-white px-4 py-1.5 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 transition hover:bg-slate-50 dark:bg-transparent dark:text-white dark:ring-white/20 dark:hover:bg-white/10"
-                  >
-                    Sign Up
-                  </Link>
-                  <span className="mx-1 h-6 w-px bg-slate-300/70 dark:bg-white/15" />
-                  <div className="ml-1">
-                    <ThemeToggler />
-                  </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+                      <path fillRule="evenodd" d="M12 2.25a5.25 5.25 0 0 0-3.712 8.988 8.25 8.25 0 1 0 7.424 0A5.25 5.25 0 0 0 12 2.25Zm0 1.5a3.75 3.75 0 1 1 0 7.5 3.75 3.75 0 0 1 0-7.5ZM6.75 19.5a5.25 5.25 0 0 1 10.5 0v.75h-10.5v-.75Z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                  {userMenuOpen && (
+                    <div className="absolute right-0 z-50 mt-2 w-44 overflow-hidden rounded-md border border-white/10 bg-white py-1 text-sm shadow-lg dark:bg-slate-900">
+                      {role === "admin" && (
+                        <button
+                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/5"
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            router.push("/admin");
+                          }}
+                        >
+                          Dashboard
+                        </button>
+                      )}
+                      <button
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-red-600 hover:bg-red-50 dark:hover:bg-white/5"
+                        onClick={onLogout}
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

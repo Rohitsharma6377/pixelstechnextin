@@ -7,6 +7,7 @@ import { Inter } from "next/font/google";
 import "node_modules/react-modal-video/css/modal-video.css";
 import "../styles/index.css";
 import { Providers } from "./providers";
+import { usePathname } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,6 +16,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith("/admin");
   return (
     <html suppressHydrationWarning lang="en">
       {/*
@@ -25,12 +28,12 @@ export default function RootLayout({
 
       <body className={`bg-[#FCFCFC] dark:bg-black ${inter.className}`}>
         <Providers>
-          <Header />
-          <main className="pt-28 md:pt-32 lg:pt-36">
+          {!isAdmin && <Header />}
+          <main className={!isAdmin ? "pt-28 md:pt-32 lg:pt-36" : "pt-0"}>
             {children}
           </main>
-          <Footer />
-          <ScrollToTop />
+          {!isAdmin && <Footer />}
+          {!isAdmin && <ScrollToTop />}
         </Providers>
       </body>
     </html>
