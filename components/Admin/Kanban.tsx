@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import clsx from "clsx";
 
 export type KanbanItem = {
@@ -29,6 +29,15 @@ export default function Kanban({ initial, onChange }: Props) {
     ]
   );
   const [dragId, setDragId] = useState<string | null>(null);
+
+  // Keep internal state in sync when parent provides a new `initial` value
+  useEffect(() => {
+    if (initial) {
+      // shallow clone arrays to avoid accidental shared references
+      const next = initial.map((c) => ({ ...c, items: [...c.items] }));
+      setColumns(next);
+    }
+  }, [initial]);
 
   function emit(next: KanbanColumn[]) {
     setColumns(next);

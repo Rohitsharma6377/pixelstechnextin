@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/app/api/lib/mongodb";
 
+export const runtime = "nodejs";
+
 function toObjectId(id: string) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { ObjectId } = require("mongodb");

@@ -6,6 +6,8 @@ export interface BlogPostDoc {
   title: string;
   slug: string;
   content: string;
+  shortDescription?: string;
+  longDescription?: string;
   imageUrl?: string | null;
   tags?: string[];
   category?: string;
@@ -31,7 +33,7 @@ async function getCollection(): Promise<Collection<BlogPostDoc>> {
 export async function listPosts() {
   const col = await getCollection();
   return await col
-    .find({}, { projection: { title: 1, slug: 1, imageUrl: 1, createdAt: 1, category: 1, tags: 1 } })
+    .find({}, { projection: { title: 1, slug: 1, imageUrl: 1, createdAt: 1, category: 1, tags: 1, authorId: 1, shortDescription: 1, longDescription: 1 } })
     .sort({ createdAt: -1 })
     .toArray();
 }
@@ -48,3 +50,4 @@ export async function createPost(post: Omit<BlogPostDoc, "_id" | "createdAt" | "
   const res = await col.insertOne(doc);
   return res.insertedId;
 }
+

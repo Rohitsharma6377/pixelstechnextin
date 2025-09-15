@@ -24,7 +24,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     const client = await clientPromise;
     const db = client.db();
     const _id = new ObjectId(params.id);
-    const doc = await db.collection("projects").findOne({ _id });
+    const doc = await db.collection("leads").findOne({ _id });
     if (!doc) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ item: doc });
   } catch (e: any) {
@@ -38,21 +38,19 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body = await req.json();
     const allowed: any = {};
-    if (body.title !== undefined) allowed.title = body.title;
-    if (body.slug !== undefined) allowed.slug = body.slug;
-    if (body.description !== undefined) allowed.description = body.description;
-    if (body.imageUrl !== undefined) allowed.imageUrl = body.imageUrl;
-    if (body.tags !== undefined) allowed.tags = body.tags;
-    if (body.url !== undefined) allowed.url = body.url;
-    if (body.repoUrl !== undefined) allowed.repoUrl = body.repoUrl;
-    if (body.featured !== undefined) allowed.featured = body.featured;
-    if (body.category !== undefined) allowed.category = body.category;
+    if (body.name !== undefined) allowed.name = body.name;
+    if (body.email !== undefined) allowed.email = body.email;
+    if (body.phone !== undefined) allowed.phone = body.phone;
+    if (body.source !== undefined) allowed.source = body.source;
+    if (body.status !== undefined) allowed.status = body.status;
+    if (body.assignee !== undefined) allowed.assignee = body.assignee;
+    if (body.note !== undefined) allowed.note = body.note;
     allowed.updatedAt = new Date();
 
     const client = await clientPromise;
     const db = client.db();
     const _id = new ObjectId(params.id);
-    const res = await db.collection("projects").findOneAndUpdate(
+    const res = await db.collection("leads").findOneAndUpdate(
       { _id },
       { $set: allowed },
       { returnDocument: "after" }
@@ -71,7 +69,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     const client = await clientPromise;
     const db = client.db();
     const _id = new ObjectId(params.id);
-    const res = await db.collection("projects").deleteOne({ _id });
+    const res = await db.collection("leads").deleteOne({ _id });
     if (!res.deletedCount) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ ok: true });
   } catch (e: any) {

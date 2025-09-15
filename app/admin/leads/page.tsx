@@ -18,6 +18,7 @@ export default function AdminLeadsPage() {
 
   const [items, setItems] = useState<Lead[]>([]);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -27,37 +28,103 @@ export default function AdminLeadsPage() {
   const [assignee, setAssignee] = useState("");
   const [note, setNote] = useState("");
 
+  // Load from API
   useEffect(() => {
-    const raw = localStorage.getItem("admin_leads");
-    if (raw) setItems(JSON.parse(raw));
+    (async () => {
+      try {
+        const res = await fetch("/api/leads");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Failed to fetch leads");
+        const list = (data.items as any[]).map((l) => ({
+          id: String(l._id),
+          name: l.name,
+          email: l.email,
+          phone: l.phone,
+          source: l.source,
+          status: l.status,
+          assignee: l.assignee,
+          note: l.note,
+          createdAt: l.createdAt ?? new Date().toISOString(),
+        })) as Lead[];
+        setItems(list);
+      } catch {
+        // ignore for now
+      }
+    })();
   }, []);
-  useEffect(() => {
-    localStorage.setItem("admin_leads", JSON.stringify(items));
-  }, [items]);
 
   function addLead(e: React.FormEvent) {
     e.preventDefault();
-    const id = Math.random().toString(36).slice(2);
-    setItems((cur) => [
-      ...cur,
-      { id, name, email, phone, source, status, assignee, note, createdAt: new Date().toISOString() },
-    ]);
-    setOpen(false);
-    setName("");
-    setEmail("");
-    setPhone("");
-    setSource("Website");
-    setStatus("New");
-    setAssignee("");
-    setNote("");
+    setLoading(true);
+    (async () => {
+      try {
+        const payload = { name, email, phone, source, status, assignee, note };
+        const res = await fetch("/api/leads", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Failed to create lead");
+        // Refresh list
+        const listRes = await fetch("/api/leads");
+        const listData = await listRes.json();
+        if (listRes.ok) {
+          const list = (listData.items as any[]).map((l) => ({
+            id: String(l._id),
+            name: l.name,
+            email: l.email,
+            phone: l.phone,
+            source: l.source,
+            status: l.status,
+            assignee: l.assignee,
+            note: l.note,
+            createdAt: l.createdAt ?? new Date().toISOString(),
+          })) as Lead[];
+          setItems(list);
+        }
+        setOpen(false);
+        setName("");
+        setEmail("");
+        setPhone("");
+        setSource("Website");
+        setStatus("New");
+        setAssignee("");
+        setNote("");
+      } catch {
+        // ignore
+      } finally {
+        setLoading(false);
+      }
+    })();
   }
 
   function remove(id: string) {
-    setItems((cur) => cur.filter((c) => c.id !== id));
+    (async () => {
+      try {
+        const res = await fetch(`/api/leads/${id}`, { method: "DELETE" });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || "Failed to delete");
+        setItems((cur) => cur.filter((c) => c.id !== id));
+      } catch {
+        // ignore
+      }
+    })();
   }
 
   function updateStatus(id: string, next: Lead["status"]) {
     setItems((cur) => cur.map((l) => (l.id === id ? { ...l, status: next } : l)));
+    (async () => {
+      try {
+        await fetch(`/api/leads/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: next }),
+        });
+      } catch {
+        // ignore
+      }
+    })();
   }
 
   const counters = useMemo(() => {
@@ -173,7 +240,7 @@ export default function AdminLeadsPage() {
           </div>
           <div className="md:col-span-2 flex justify-end gap-2">
             <button type="button" onClick={() => setOpen(false)} className="rounded border border-white/10 px-4 py-2 text-sm">Cancel</button>
-            <button className="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">Add lead</button>
+            <button type="submit" disabled={loading} className="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{loading ? "Saving..." : "Add lead"}</button>
           </div>
         </form>
       </Modal>

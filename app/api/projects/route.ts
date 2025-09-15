@@ -8,15 +8,6 @@ function getTokenFromRequest(req: Request) {
   return token;
 }
 
-async function requireAdmin(req: Request) {
-  const token = getTokenFromRequest(req);
-  if (!token) return null;
-  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || "default_secret_change_me");
-  const { payload } = await jwtVerify(token, secret, { algorithms: ["HS256"] });
-  if ((payload as any).role !== "ADMIN") return null;
-  return payload as any;
-}
-
 export async function GET() {
   try {
     const items = await listProjects();
@@ -28,8 +19,11 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const admin = await requireAdmin(req);
-    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Require authentication but not ADMIN role
+    const token = getTokenFromRequest(req);
+    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || "default_secret_change_me");
+    await jwtVerify(token, secret, { algorithms: ["HS256"] });
 
     const body = await req.json();
     const { title, description, imageUrl, tags, url, repoUrl, featured, category } = body || {};

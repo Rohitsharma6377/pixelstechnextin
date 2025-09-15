@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/app/api/lib/mongodb";
-import { jwtVerify } from "jose";
+// import { jwtVerify } from "jose";
 
 function getTokenFromRequest(req: Request) {
   const headerCookie = (req.headers as any).get?.("cookie") as string | null;
@@ -14,7 +14,24 @@ export async function GET() {
     const db = client.db();
     const posts = await db
       .collection("posts")
-      .find({}, { projection: { title: 1, slug: 1, imageUrl: 1, createdAt: 1, category: 1, tags: 1, metaTitle: 1, metaDescription: 1 } })
+      .find(
+        {},
+        {
+          projection: {
+            title: 1,
+            slug: 1,
+            imageUrl: 1,
+            createdAt: 1,
+            category: 1,
+            tags: 1,
+            metaTitle: 1,
+            metaDescription: 1,
+            authorId: 1,
+            shortDescription: 1,
+            longDescription: 1,
+          },
+        }
+      )
       .sort({ createdAt: -1 })
       .toArray();
     return NextResponse.json({ posts });
@@ -25,13 +42,10 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const token = getTokenFromRequest(req);
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || "default_secret_change_me");
-    const { payload } = await jwtVerify(token, secret, { algorithms: ["HS256"] });
+    // Auth disabled for development. Re-enable by restoring jwtVerify above.
 
     const body = await req.json();
-    const { title, content, imageUrl, tags, category, metaTitle, metaDescription, metaKeywords } = body || {};
+    const { title, content, imageUrl, tags, category, metaTitle, metaDescription, metaKeywords, authorId, shortDescription, longDescription, published } = body || {};
     if (!title || !content) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
     const slug =
@@ -46,14 +60,17 @@ export async function POST(req: Request) {
     const result = await db.collection("posts").insertOne({
       title,
       content,
-      imageUrl: imageUrl || null,
+      imageUrl: imageUrl ?? null,
       slug,
       tags: Array.isArray(tags) ? tags : [],
-      category: category || null,
-      metaTitle: metaTitle || title,
-      metaDescription: metaDescription || (content as string).slice(0, 160),
+      category: category !== undefined ? category : null,
+      metaTitle: metaTitle !== undefined ? metaTitle : title,
+      metaDescription: metaDescription !== undefined ? metaDescription : (content as string).slice(0, 160),
       metaKeywords: Array.isArray(metaKeywords) ? metaKeywords : [],
-      authorId: (payload as any).id,
+      authorId: authorId ?? null,
+      shortDescription: shortDescription !== undefined ? shortDescription : undefined,
+      longDescription: longDescription !== undefined ? longDescription : undefined,
+      published: published !== undefined ? !!published : true,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

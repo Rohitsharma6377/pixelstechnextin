@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createProject, deleteProject, fetchProjects } from "@/features/admin/adminSlice";
+import { createProject, deleteProject, fetchProjects, updateProject } from "@/features/admin/adminSlice";
 import type { RootState, AppDispatch } from "@/app/store";
 import Upload from "@/components/Admin/Upload";
 import Modal from "@/components/Admin/Modal";
@@ -22,6 +22,7 @@ export default function AdminProjectsPage() {
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
   const [openCreate, setOpenCreate] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchProjects());
@@ -30,20 +31,40 @@ export default function AdminProjectsPage() {
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!title) return;
-    await dispatch(
-      createProject({
-        title,
-        description,
-        imageUrl: imageUrl || undefined,
-        tags: tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
-        url: url || undefined,
-        repoUrl: repoUrl || undefined,
-        featured,
-        category: category || undefined,
-        metaTitle: metaTitle || title,
-        metaDescription: metaDescription || description.slice(0, 160),
-      }) as any
-    );
+    if (editingId) {
+      await dispatch(
+        updateProject({
+          id: editingId,
+          updates: {
+            title,
+            description,
+            imageUrl: imageUrl || undefined,
+            tags: tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+            url, // allow empty string
+            repoUrl, // allow empty string
+            featured,
+            category, // allow empty string
+            metaTitle, // allow empty string
+            metaDescription, // allow empty string
+          },
+        }) as any
+      );
+    } else {
+      await dispatch(
+        createProject({
+          title,
+          description,
+          imageUrl: imageUrl || undefined,
+          tags: tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+          url, // allow empty string
+          repoUrl, // allow empty string
+          featured,
+          category, // allow empty string
+          metaTitle, // allow empty string
+          metaDescription, // allow empty string
+        }) as any
+      );
+    }
     setTitle("");
     setDescription("");
     setImageUrl(undefined);
@@ -54,8 +75,24 @@ export default function AdminProjectsPage() {
     setCategory("");
     setMetaTitle("");
     setMetaDescription("");
+    setEditingId(null);
     setOpenCreate(false);
     dispatch(fetchProjects());
+  }
+
+  function openEdit(p: any) {
+    setEditingId(p._id);
+    setTitle(p.title || "");
+    setDescription((p as any).description || "");
+    setImageUrl(p.imageUrl || undefined);
+    setTags((p.tags || []).join(", "));
+    setUrl(p.url || "");
+    setRepoUrl(p.repoUrl || "");
+    setFeatured(!!p.featured);
+    setCategory(p.category || "");
+    setMetaTitle(p.metaTitle || "");
+    setMetaDescription(p.metaDescription || "");
+    setOpenCreate(true);
   }
 
   return (
@@ -71,7 +108,7 @@ export default function AdminProjectsPage() {
         <button onClick={() => setOpenCreate(true)} className="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500">New Project</button>
       </div>
 
-      <Modal open={openCreate} onClose={() => setOpenCreate(false)} title="New Project" maxWidth="xl">
+      <Modal open={openCreate} onClose={() => setOpenCreate(false)} title={editingId ? "Edit Project" : "New Project"} maxWidth="xl">
         <form onSubmit={onCreate} className="grid gap-4 md:grid-cols-2">
           <div>
             <label className="mb-1 block text-sm">Title</label>
@@ -115,7 +152,7 @@ export default function AdminProjectsPage() {
           </div>
           <div className="md:col-span-2 flex justify-end gap-2">
             <button type="button" onClick={() => setOpenCreate(false)} className="rounded border border-white/10 px-4 py-2 text-sm">Cancel</button>
-            <button disabled={loading} className="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{loading ? "Saving..." : "Add project"}</button>
+            <button disabled={loading} className="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{loading ? "Saving..." : (editingId ? "Save changes" : "Add project")}</button>
           </div>
         </form>
       </Modal>
@@ -143,7 +180,10 @@ export default function AdminProjectsPage() {
                 <td className="px-4 py-3 text-sm">{p.category ?? "-"}</td>
                 <td className="px-4 py-3 text-sm">{p.featured ? "Yes" : "No"}</td>
                 <td className="px-4 py-3 text-sm">
-                  <button onClick={() => dispatch(deleteProject(p._id)).then(() => dispatch(fetchProjects()))} className="text-red-600">Delete</button>
+                  <div className="flex gap-2">
+                    <button onClick={() => openEdit(p)} className="rounded border border-white/10 px-2 py-1 text-xs">Edit</button>
+                    <button onClick={() => dispatch(deleteProject(p._id)).then(() => dispatch(fetchProjects()))} className="rounded border border-red-500/40 bg-red-500/10 px-2 py-1 text-xs text-red-500">Delete</button>
+                  </div>
                 </td>
               </tr>
             ))}

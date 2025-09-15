@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createTestimonial, deleteTestimonial, fetchTestimonials } from "@/features/admin/adminSlice";
+import { createTestimonial, deleteTestimonial, fetchTestimonials, updateTestimonial } from "@/features/admin/adminSlice";
 import type { RootState, AppDispatch } from "@/app/store";
 import Upload from "@/components/Admin/Upload";
 import Modal from "@/components/Admin/Modal";
@@ -18,6 +18,7 @@ export default function AdminTestimonialsPage() {
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
   const [published, setPublished] = useState(true);
   const [openCreate, setOpenCreate] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchTestimonials());
@@ -26,24 +27,52 @@ export default function AdminTestimonialsPage() {
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!name || !message) return;
-    await dispatch(
-      createTestimonial({
-        name,
-        company: company || undefined,
-        message,
-        rating,
-        avatarUrl: avatarUrl || undefined,
-        published,
-      } as any)
-    );
+    if (editingId) {
+      await dispatch(
+        updateTestimonial({
+          id: editingId,
+          updates: {
+            name,
+            company, // allow empty
+            message,
+            rating,
+            avatarUrl: avatarUrl,
+            published,
+          },
+        }) as any
+      );
+    } else {
+      await dispatch(
+        createTestimonial({
+          name,
+          company: company || undefined,
+          message,
+          rating,
+          avatarUrl: avatarUrl || undefined,
+          published,
+        } as any)
+      );
+    }
     setName("");
     setCompany("");
     setMessage("");
     setRating(undefined);
     setAvatarUrl(undefined);
     setPublished(true);
+    setEditingId(null);
     setOpenCreate(false);
     dispatch(fetchTestimonials());
+  }
+
+  function openEdit(t: any) {
+    setEditingId(String(t._id));
+    setName(t.name || "");
+    setCompany(t.company || "");
+    setMessage(t.message || "");
+    setRating(t.rating ?? undefined);
+    setAvatarUrl(t.avatarUrl || undefined);
+    setPublished(!!t.published);
+    setOpenCreate(true);
   }
 
   return (
@@ -59,7 +88,7 @@ export default function AdminTestimonialsPage() {
         <button onClick={() => setOpenCreate(true)} className="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500">New Testimonial</button>
       </div>
 
-      <Modal open={openCreate} onClose={() => setOpenCreate(false)} title="New Testimonial">
+      <Modal open={openCreate} onClose={() => setOpenCreate(false)} title={editingId ? "Edit Testimonial" : "New Testimonial"}>
         <form onSubmit={onCreate} className="grid gap-4 md:grid-cols-2">
           <div>
             <label className="mb-1 block text-sm">Name</label>
@@ -87,7 +116,7 @@ export default function AdminTestimonialsPage() {
           </div>
           <div className="md:col-span-2 flex justify-end gap-2">
             <button type="button" onClick={() => setOpenCreate(false)} className="rounded border border-white/10 px-4 py-2 text-sm">Cancel</button>
-            <button disabled={loading} className="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{loading ? "Saving..." : "Add testimonial"}</button>
+            <button disabled={loading} className="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{loading ? "Saving..." : (editingId ? "Save changes" : "Add testimonial")}</button>
           </div>
         </form>
       </Modal>
@@ -115,9 +144,21 @@ export default function AdminTestimonialsPage() {
                 <td className="px-4 py-3 text-sm">{t.name}</td>
                 <td className="px-4 py-3 text-sm">{t.company ?? "-"}</td>
                 <td className="px-4 py-3 text-sm">{t.rating ?? "-"}</td>
-                <td className="px-4 py-3 text-sm">{t.published ? "Yes" : "No"}</td>
                 <td className="px-4 py-3 text-sm">
-                  <button onClick={() => dispatch(deleteTestimonial(t._id)).then(() => dispatch(fetchTestimonials()))} className="text-red-600">Delete</button>
+                  <label className="inline-flex cursor-pointer items-center gap-2 text-xs">
+                    <input
+                      type="checkbox"
+                      checked={!!t.published}
+                      onChange={(e) => dispatch(updateTestimonial({ id: t._id as any, updates: { published: e.target.checked } }) as any)}
+                    />
+                    {t.published ? "Yes" : "No"}
+                  </label>
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => openEdit(t)} className="rounded border border-white/10 px-2 py-1 text-xs">Edit</button>
+                    <button onClick={() => dispatch(deleteTestimonial(t._id)).then(() => dispatch(fetchTestimonials()))} className="text-red-600">Delete</button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -127,3 +168,4 @@ export default function AdminTestimonialsPage() {
     </div>
   );
 }
+

@@ -22,6 +22,7 @@ export default function RichEditor({ value, onChange, placeholder }: Props) {
   const holderRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<any>(null);
   const initialValueRef = useRef<string>(value);
+  const createdRef = useRef<boolean>(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,10 +40,25 @@ export default function RichEditor({ value, onChange, placeholder }: Props) {
         });
       }
       if (cancelled) return;
-      if (holderRef.current && window.ClassicEditor) {
-        editorRef.current = await window.ClassicEditor.create(holderRef.current, {
-          placeholder: placeholder || "Write your content...",
-        });
+      if (holderRef.current && window.ClassicEditor && !createdRef.current && !editorRef.current) {
+        // guard against StrictMode double-invoke and ensure clean holder
+        holderRef.current.innerHTML = "";
+        // set the guard BEFORE awaiting to avoid racing double-create
+        createdRef.current = true;
+        try {
+          const ed = await window.ClassicEditor.create(holderRef.current, {
+            placeholder: placeholder || "Write your content...",
+          });
+          if (cancelled) {
+            // if unmounted while creating, destroy and bail
+            ed.destroy().catch(() => {});
+            return;
+          }
+          editorRef.current = ed;
+        } catch (e) {
+          createdRef.current = false;
+          throw e;
+        }
         // Set initial content
         editorRef.current.setData(initialValueRef.current || "");
         // Change handler
@@ -63,6 +79,9 @@ export default function RichEditor({ value, onChange, placeholder }: Props) {
         editorRef.current.destroy().catch(() => {});
         editorRef.current = null;
       }
+      // allow re-creation on next mount (e.g., when reopening a modal)
+      createdRef.current = false;
+      if (holderRef.current) holderRef.current.innerHTML = "";
     };
   }, [onChange, placeholder]);
 

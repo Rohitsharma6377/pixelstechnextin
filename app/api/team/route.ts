@@ -8,12 +8,11 @@ function getTokenFromRequest(req: Request) {
   return token;
 }
 
-async function requireAdmin(req: Request) {
+async function requireAuth(req: Request) {
   const token = getTokenFromRequest(req);
   if (!token) return null;
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || "default_secret_change_me");
   const { payload } = await jwtVerify(token, secret, { algorithms: ["HS256"] });
-  if ((payload as any).role !== "ADMIN") return null;
   return payload as any;
 }
 
@@ -28,8 +27,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const admin = await requireAdmin(req);
-    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAuth(req);
+    if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
     const { name, role, bio, imageUrl, socials, order } = body || {};

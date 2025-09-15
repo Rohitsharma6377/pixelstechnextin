@@ -24,7 +24,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     const client = await clientPromise;
     const db = client.db();
     const _id = new ObjectId(params.id);
-    const doc = await db.collection("projects").findOne({ _id });
+    const doc = await db.collection("authors").findOne({ _id });
     if (!doc) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ item: doc });
   } catch (e: any) {
@@ -38,21 +38,16 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body = await req.json();
     const allowed: any = {};
-    if (body.title !== undefined) allowed.title = body.title;
-    if (body.slug !== undefined) allowed.slug = body.slug;
-    if (body.description !== undefined) allowed.description = body.description;
+    if (body.name !== undefined) allowed.name = body.name;
+    if (body.designation !== undefined) allowed.designation = body.designation;
+    if (body.bio !== undefined) allowed.bio = body.bio;
     if (body.imageUrl !== undefined) allowed.imageUrl = body.imageUrl;
-    if (body.tags !== undefined) allowed.tags = body.tags;
-    if (body.url !== undefined) allowed.url = body.url;
-    if (body.repoUrl !== undefined) allowed.repoUrl = body.repoUrl;
-    if (body.featured !== undefined) allowed.featured = body.featured;
-    if (body.category !== undefined) allowed.category = body.category;
     allowed.updatedAt = new Date();
 
     const client = await clientPromise;
     const db = client.db();
     const _id = new ObjectId(params.id);
-    const res = await db.collection("projects").findOneAndUpdate(
+    const res = await db.collection("authors").findOneAndUpdate(
       { _id },
       { $set: allowed },
       { returnDocument: "after" }
@@ -71,7 +66,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     const client = await clientPromise;
     const db = client.db();
     const _id = new ObjectId(params.id);
-    const res = await db.collection("projects").deleteOne({ _id });
+    const res = await db.collection("authors").deleteOne({ _id });
     if (!res.deletedCount) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ ok: true });
   } catch (e: any) {

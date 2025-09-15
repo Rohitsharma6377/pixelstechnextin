@@ -18,39 +18,85 @@ export default function AdminNotesPage() {
   const [body, setBody] = useState("");
   const [tags, setTags] = useState("");
   const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  // Load from API
   useEffect(() => {
-    const raw = localStorage.getItem("admin_notes");
-    if (raw) setItems(JSON.parse(raw));
+    (async () => {
+      try {
+        const res = await fetch("/api/notes");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Failed to fetch notes");
+        const list = (data.items as any[]).map((n) => ({
+          id: String(n._id),
+          title: n.title,
+          body: n.body,
+          tags: n.tags ?? [],
+          createdAt: n.createdAt ?? new Date().toISOString(),
+        })) as Note[];
+        setItems(list);
+      } catch {
+        // ignore
+      }
+    })();
   }, []);
-  useEffect(() => {
-    localStorage.setItem("admin_notes", JSON.stringify(items));
-  }, [items]);
 
   function addNote(e: React.FormEvent) {
     e.preventDefault();
-    const id = Math.random().toString(36).slice(2);
-    setItems((cur) => [
-      ...cur,
-      {
-        id,
-        title,
-        body,
-        tags: tags
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean),
-        createdAt: new Date().toISOString(),
-      },
-    ]);
-    setOpen(false);
-    setTitle("");
-    setBody("");
-    setTags("");
+    setLoading(true);
+    (async () => {
+      try {
+        const payload = {
+          title,
+          body,
+          tags: tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean),
+        };
+        const res = await fetch("/api/notes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Failed to create note");
+        // Refresh
+        const listRes = await fetch("/api/notes");
+        const listData = await listRes.json();
+        if (listRes.ok) {
+          const list = (listData.items as any[]).map((n) => ({
+            id: String(n._id),
+            title: n.title,
+            body: n.body,
+            tags: n.tags ?? [],
+            createdAt: n.createdAt ?? new Date().toISOString(),
+          })) as Note[];
+          setItems(list);
+        }
+        setOpen(false);
+        setTitle("");
+        setBody("");
+        setTags("");
+      } catch {
+        // ignore
+      } finally {
+        setLoading(false);
+      }
+    })();
   }
 
   function remove(id: string) {
-    setItems((cur) => cur.filter((n) => n.id !== id));
+    (async () => {
+      try {
+        const res = await fetch(`/api/notes/${id}`, { method: "DELETE" });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || "Failed to delete");
+        setItems((cur) => cur.filter((n) => n.id !== id));
+      } catch {
+        // ignore
+      }
+    })();
   }
 
   const filtered = useMemo(() => {
@@ -69,7 +115,7 @@ export default function AdminNotesPage() {
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Notes</h1>
-          <p className="text-sm text-slate-500">Simple notes with tags. Data persists locally until API is wired.</p>
+          <p className="text-sm text-slate-500">Keep your notes organized with tags. Notes are now saved to the database.</p>
         </div>
         <div className="flex items-center gap-2">
           <input
@@ -87,10 +133,14 @@ export default function AdminNotesPage() {
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-500 dark:bg-transparent">No notes</div>
         )}
         {filtered.map((n) => (
-          <div key={n.id} className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm dark:bg-transparent">
+          <div
+            key={n.id}
+            className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/40 to-white/10 p-4 shadow-sm backdrop-blur dark:from-slate-900/50 dark:to-slate-800/30 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-indigo-400/20 blur-3xl transition-opacity duration-300 group-hover:opacity-80" />
             <div className="mb-2 flex items-center justify-between">
               <h3 className="text-base font-semibold">{n.title}</h3>
-              <button onClick={() => remove(n.id)} className="text-xs text-red-600">Delete</button>
+              <button onClick={() => remove(n.id)} className="rounded px-2 py-0.5 text-xs text-red-600 hover:bg-red-500/10">Delete</button>
             </div>
             <div className="prose prose-sm max-w-none dark:prose-invert">
               <p className="whitespace-pre-line text-sm">{n.body}</p>
@@ -98,7 +148,7 @@ export default function AdminNotesPage() {
             {n.tags.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-1">
                 {n.tags.map((t) => (
-                  <span key={t} className="rounded-full bg-white/10 px-2 py-0.5 text-xs">#{t}</span>
+                  <span key={t} className="rounded-full bg-indigo-500/10 px-2 py-0.5 text-xs text-indigo-600 dark:text-indigo-300">#{t}</span>
                 ))}
               </div>
             )}
@@ -122,10 +172,11 @@ export default function AdminNotesPage() {
           </div>
           <div className="flex justify-end gap-2">
             <button type="button" onClick={() => setOpen(false)} className="rounded border border-white/10 px-4 py-2 text-sm">Cancel</button>
-            <button className="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">Save</button>
+            <button disabled={loading} className="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{loading ? "Saving..." : "Save"}</button>
           </div>
         </form>
       </Modal>
     </div>
   );
 }
+

@@ -64,7 +64,19 @@ export type Blog = {
   tags?: string[];
   metaTitle?: string;
   metaDescription?: string;
+  authorId?: Id;
+  shortDescription?: string | null;
+  longDescription?: string | null;
+  published?: boolean;
   createdAt?: string;
+};
+
+export type Author = {
+  _id: Id;
+  name: string;
+  designation?: string;
+  bio?: string;
+  imageUrl?: string | null;
 };
 
 async function api<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
@@ -94,6 +106,14 @@ export const deleteTeam = createAsyncThunk("admin/deleteTeam", async (id: Id) =>
   return id;
 });
 
+export const updateTeam = createAsyncThunk(
+  "admin/updateTeam",
+  async ({ id, updates }: { id: Id; updates: Partial<TeamMember> }) => {
+    const data = await api<{ item: TeamMember }>(`/api/team/${id}`, { method: "PUT", body: JSON.stringify(updates) });
+    return data.item;
+  }
+);
+
 export const fetchProjects = createAsyncThunk("admin/fetchProjects", async () => {
   const data = await api<{ items: Project[] }>("/api/projects");
   return data.items;
@@ -108,6 +128,14 @@ export const deleteProject = createAsyncThunk("admin/deleteProject", async (id: 
   await api<{ ok: true }>(`/api/projects/${id}`, { method: "DELETE" });
   return id;
 });
+
+export const updateProject = createAsyncThunk(
+  "admin/updateProject",
+  async ({ id, updates }: { id: Id; updates: Partial<Project> }) => {
+    const data = await api<{ item: Project }>(`/api/projects/${id}`, { method: "PUT", body: JSON.stringify(updates) });
+    return data.item;
+  }
+);
 
 export const fetchTestimonials = createAsyncThunk("admin/fetchTestimonials", async () => {
   const data = await api<{ items: Testimonial[] }>("/api/testimonials");
@@ -124,6 +152,14 @@ export const deleteTestimonial = createAsyncThunk("admin/deleteTestimonial", asy
   return id;
 });
 
+export const updateTestimonial = createAsyncThunk(
+  "admin/updateTestimonial",
+  async ({ id, updates }: { id: Id; updates: Partial<Omit<Testimonial, "_id">> }) => {
+    const data = await api<{ item: Testimonial }>(`/api/testimonials/${id}`, { method: "PUT", body: JSON.stringify(updates) });
+    return data.item;
+  }
+);
+
 export const fetchBlogs = createAsyncThunk("admin/fetchBlogs", async () => {
   const data = await api<{ posts: Blog[] }>("/api/blog");
   return data.posts;
@@ -131,11 +167,45 @@ export const fetchBlogs = createAsyncThunk("admin/fetchBlogs", async () => {
 
 export const createBlog = createAsyncThunk(
   "admin/createBlog",
-  async (body: { title: string; content: string; imageUrl?: string | null; tags?: string[]; category?: string; metaTitle?: string; metaDescription?: string; metaKeywords?: string[] }) => {
+  async (body: { title: string; content: string; imageUrl?: string | null; tags?: string[]; category?: string; metaTitle?: string; metaDescription?: string; metaKeywords?: string[]; authorId?: Id; shortDescription?: string; longDescription?: string }) => {
     const data = await api<{ ok: true; id: Id; slug: string }>("/api/blog", { method: "POST", body: JSON.stringify(body) });
     return data.id;
   }
 );
+
+export const updateBlog = createAsyncThunk(
+  "admin/updateBlog",
+  async ({ slug, updates }: { slug: string; updates: Partial<{
+    title: string; content: string; imageUrl?: string | null; tags?: string[]; category?: string; metaTitle?: string; metaDescription?: string; metaKeywords?: string[]; authorId?: Id; shortDescription?: string; longDescription?: string; published?: boolean
+  }> }) => {
+    const data = await api<{ ok: true }>(`/api/blog/${slug}`, { method: "PUT", body: JSON.stringify(updates) });
+    return { slug };
+  }
+);
+
+// Authors
+export const fetchAuthors = createAsyncThunk("admin/fetchAuthors", async () => {
+  const data = await api<{ items: Author[] }>("/api/authors");
+  return data.items;
+});
+
+export const createAuthor = createAsyncThunk("admin/createAuthor", async (body: Omit<Author, "_id">) => {
+  const data = await api<{ ok: true; id: Id }>("/api/authors", { method: "POST", body: JSON.stringify(body) });
+  return data.id;
+});
+
+export const updateAuthor = createAsyncThunk(
+  "admin/updateAuthor",
+  async ({ id, updates }: { id: Id; updates: Partial<Omit<Author, "_id">> }) => {
+    const data = await api<{ item: Author }>(`/api/authors/${id}`, { method: "PUT", body: JSON.stringify(updates) });
+    return data.item;
+  }
+);
+
+export const deleteAuthor = createAsyncThunk("admin/deleteAuthor", async (id: Id) => {
+  await api<{ ok: true }>(`/api/authors/${id}`, { method: "DELETE" });
+  return id;
+});
 
 interface AdminState {
   loading: boolean;
@@ -145,6 +215,7 @@ interface AdminState {
   projects: Project[];
   testimonials: Testimonial[];
   blogs: Blog[];
+  authors: Author[];
 }
 
 const initialState: AdminState = {
@@ -155,6 +226,7 @@ const initialState: AdminState = {
   projects: [],
   testimonials: [],
   blogs: [],
+  authors: [],
 };
 
 const adminSlice = createSlice({
@@ -191,9 +263,16 @@ const adminSlice = createSlice({
       .addCase(deleteTeam.pending, start)
       .addCase(deleteTeam.fulfilled, (s, a) => {
         s.loading = false;
-        s.team = s.team.filter((m) => m._id !== a.payload);
+        s.team = s.team.filter((m) => String(m._id) !== String(a.payload));
       })
       .addCase(deleteTeam.rejected, fail)
+      .addCase(updateTeam.pending, start)
+      .addCase(updateTeam.fulfilled, (s, a) => {
+        s.loading = false;
+        const idx = s.team.findIndex((m) => String(m._id) === String(a.payload._id));
+        if (idx !== -1) s.team[idx] = a.payload as any;
+      })
+      .addCase(updateTeam.rejected, fail)
       .addCase(fetchProjects.pending, start)
       .addCase(fetchProjects.fulfilled, (s, a) => {
         s.loading = false;
@@ -208,9 +287,16 @@ const adminSlice = createSlice({
       .addCase(deleteProject.pending, start)
       .addCase(deleteProject.fulfilled, (s, a) => {
         s.loading = false;
-        s.projects = s.projects.filter((p) => p._id !== a.payload);
+        s.projects = s.projects.filter((p) => String(p._id) !== String(a.payload));
       })
       .addCase(deleteProject.rejected, fail)
+      .addCase(updateProject.pending, start)
+      .addCase(updateProject.fulfilled, (s, a) => {
+        s.loading = false;
+        const idx = s.projects.findIndex((p) => String(p._id) === String(a.payload._id));
+        if (idx !== -1) s.projects[idx] = a.payload as any;
+      })
+      .addCase(updateProject.rejected, fail)
       .addCase(fetchTestimonials.pending, start)
       .addCase(fetchTestimonials.fulfilled, (s, a) => {
         s.loading = false;
@@ -225,9 +311,16 @@ const adminSlice = createSlice({
       .addCase(deleteTestimonial.pending, start)
       .addCase(deleteTestimonial.fulfilled, (s, a) => {
         s.loading = false;
-        s.testimonials = s.testimonials.filter((t) => t._id !== a.payload);
+        s.testimonials = s.testimonials.filter((t) => String(t._id) !== String(a.payload));
       })
       .addCase(deleteTestimonial.rejected, fail)
+      .addCase(updateTestimonial.pending, start)
+      .addCase(updateTestimonial.fulfilled, (s, a) => {
+        s.loading = false;
+        const idx = s.testimonials.findIndex((t) => String(t._id) === String(a.payload._id));
+        if (idx !== -1) s.testimonials[idx] = a.payload as any;
+      })
+      .addCase(updateTestimonial.rejected, fail)
       .addCase(fetchBlogs.pending, start)
       .addCase(fetchBlogs.fulfilled, (s, a) => {
         s.loading = false;
@@ -238,7 +331,36 @@ const adminSlice = createSlice({
       .addCase(createBlog.fulfilled, (s) => {
         s.loading = false;
       })
-      .addCase(createBlog.rejected, fail);
+      .addCase(createBlog.rejected, fail)
+      .addCase(updateBlog.pending, start)
+      .addCase(updateBlog.fulfilled, (s) => {
+        s.loading = false;
+      })
+      .addCase(updateBlog.rejected, fail)
+      .addCase(fetchAuthors.pending, start)
+      .addCase(fetchAuthors.fulfilled, (s, a) => {
+        s.loading = false;
+        s.authors = a.payload;
+      })
+      .addCase(fetchAuthors.rejected, fail)
+      .addCase(createAuthor.pending, start)
+      .addCase(createAuthor.fulfilled, (s) => {
+        s.loading = false;
+      })
+      .addCase(createAuthor.rejected, fail)
+      .addCase(updateAuthor.pending, start)
+      .addCase(updateAuthor.fulfilled, (s, a) => {
+        s.loading = false;
+        const idx = s.authors.findIndex((x) => String(x._id) === String(a.payload._id));
+        if (idx !== -1) s.authors[idx] = a.payload as any;
+      })
+      .addCase(updateAuthor.rejected, fail)
+      .addCase(deleteAuthor.pending, start)
+      .addCase(deleteAuthor.fulfilled, (s, a) => {
+        s.loading = false;
+        s.authors = s.authors.filter((x) => String(x._id) !== String(a.payload));
+      })
+      .addCase(deleteAuthor.rejected, fail);
   },
 });
 

@@ -51,3 +51,29 @@
     animation-play-state: paused;
   }
 }
+
+/* CKEditor: force readable contrast regardless of theme */
+.ck.ck-editor__editable_inline,
+.ck-content {
+  min-height: 140px;
+  color: #111111; /* black text */
+  background: #ffffff; /* white background inside editor */
+}
+
+.ck-content p { color: inherit; }
+
+.dark .ck.ck-editor__editable_inline,
+.dark .ck-content {
+  color: #111111; /* keep black text */
+  background: #ffffff; /* keep white background */
+}
+
+/* Optional: adjust toolbar in dark mode for contrast */
+.dark .ck.ck-toolbar {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .ck.ck-editor__editable_inline {
+  border-color: rgba(255, 255, 255, 0.1);
+}

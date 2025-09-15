@@ -8,6 +8,7 @@ export default function AdminClientsPage() {
   type Client = { id: string; name: string; company?: string; email?: string; phone?: string; website?: string; logoUrl?: string };
   const [items, setItems] = useState<Client[]>([]);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
@@ -15,30 +16,83 @@ export default function AdminClientsPage() {
   const [website, setWebsite] = useState("");
   const [logoUrl, setLogoUrl] = useState<string>("");
 
+  // Load from API on mount
   useEffect(() => {
-    // Local storage bootstrap (temporary until API is wired)
-    const raw = localStorage.getItem("admin_clients");
-    if (raw) setItems(JSON.parse(raw));
+    (async () => {
+      try {
+        const res = await fetch("/api/clients");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Failed to fetch clients");
+        const list = (data.items as any[]).map((c) => ({
+          id: String(c._id),
+          name: c.name,
+          company: c.company,
+          email: c.email,
+          phone: c.phone,
+          website: c.website,
+          logoUrl: c.logoUrl,
+        })) as Client[];
+        setItems(list);
+      } catch {
+        // ignore for now
+      }
+    })();
   }, []);
-  useEffect(() => {
-    localStorage.setItem("admin_clients", JSON.stringify(items));
-  }, [items]);
 
   function addClient(e: React.FormEvent) {
     e.preventDefault();
-    const id = Math.random().toString(36).slice(2);
-    setItems((cur) => [...cur, { id, name, company, email, phone, website, logoUrl }]);
-    setOpen(false);
-    setName("");
-    setCompany("");
-    setEmail("");
-    setPhone("");
-    setWebsite("");
-    setLogoUrl("");
+    setLoading(true);
+    (async () => {
+      try {
+        const payload = { name, company, email, phone, website, logoUrl };
+        const res = await fetch("/api/clients", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Failed to create client");
+        // Refresh
+        const listRes = await fetch("/api/clients");
+        const listData = await listRes.json();
+        if (listRes.ok) {
+          const list = (listData.items as any[]).map((c) => ({
+            id: String(c._id),
+            name: c.name,
+            company: c.company,
+            email: c.email,
+            phone: c.phone,
+            website: c.website,
+            logoUrl: c.logoUrl,
+          })) as Client[];
+          setItems(list);
+        }
+        setOpen(false);
+        setName("");
+        setCompany("");
+        setEmail("");
+        setPhone("");
+        setWebsite("");
+        setLogoUrl("");
+      } catch {
+        // ignore
+      } finally {
+        setLoading(false);
+      }
+    })();
   }
 
   function remove(id: string) {
-    setItems((cur) => cur.filter((c) => c.id !== id));
+    (async () => {
+      try {
+        const res = await fetch(`/api/clients/${id}`, { method: "DELETE" });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || "Failed to delete");
+        setItems((cur) => cur.filter((c) => c.id !== id));
+      } catch {
+        // ignore
+      }
+    })();
   }
 
   return (
@@ -111,7 +165,7 @@ export default function AdminClientsPage() {
           </div>
           <div className="md:col-span-2 flex justify-end gap-2">
             <button type="button" onClick={() => setOpen(false)} className="rounded border border-white/10 px-4 py-2 text-sm">Cancel</button>
-            <button className="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">Add client</button>
+            <button type="submit" disabled={loading} className="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{loading ? "Saving..." : "Add client"}</button>
           </div>
         </form>
       </Modal>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { IconLayoutDashboard, IconMail, IconUsers, IconFolder, IconMessage2, IconArticle, IconChevronDown, IconMenu2 } from "@tabler/icons-react";
+import { IconLayoutDashboard, IconMail, IconUsers, IconFolder, IconMessage2, IconArticle, IconChevronDown, IconMenu2, IconUser } from "@tabler/icons-react";
 import clsx from "clsx";
 
 type LinkItem = { href: string; label: string; icon: any };
@@ -23,6 +23,7 @@ const groups: Group[] = [
       { href: "/admin/projects", label: "Projects", icon: IconFolder },
       { href: "/admin/testimonials", label: "Testimonials", icon: IconMessage2 },
       { href: "/admin/blogs", label: "Blogs", icon: IconArticle },
+      { href: "/admin/authors", label: "Authors", icon: IconUser },
     ],
   },
   {

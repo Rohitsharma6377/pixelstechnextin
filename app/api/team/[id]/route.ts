@@ -11,12 +11,11 @@ function getTokenFromRequest(req: Request) {
   return token;
 }
 
-async function requireAdmin(req: Request) {
+async function requireAuth(req: Request) {
   const token = getTokenFromRequest(req);
   if (!token) return null;
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || "default_secret_change_me");
   const { payload } = await jwtVerify(token, secret, { algorithms: ["HS256"] });
-  if ((payload as any).role !== "ADMIN") return null;
   return payload as any;
 }
 
@@ -35,8 +34,8 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
   try {
-    const admin = await requireAdmin(req);
-    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAuth(req);
+    if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body = await req.json();
     const allowed: any = {};
     if (body.name !== undefined) allowed.name = body.name;
@@ -64,8 +63,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
-    const admin = await requireAdmin(req);
-    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAuth(req);
+    if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const client = await clientPromise;
     const db = client.db();
     const _id = new ObjectId(params.id);
