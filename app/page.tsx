@@ -32,7 +32,7 @@ export default function Home() {
       <Features />
       {/* <FocusCardsDemo/> */}
       <Video />
-      <Brands />
+      {/* <Brands /> */}
       <AboutSectionOne />
       <AboutSectionTwo />
       <WhyUs />
